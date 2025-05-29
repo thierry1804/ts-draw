@@ -1,10 +1,11 @@
 import React, { useState } from 'react';
-import { ChevronLeft, ChevronRight, Download, Plus, Search, Save } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Download, Plus, Search, Save, Layout, FileEdit } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 import Header from './Header';
 import TreeView from '../tree/TreeView';
 import ElementEditor from '../editor/ElementEditor';
 import SearchResults from '../search/SearchResults';
+import GraphView from '../graph/GraphView';
 import { useElements } from '../../contexts/ElementsContext';
 
 const MainLayout: React.FC = () => {
@@ -14,6 +15,7 @@ const MainLayout: React.FC = () => {
   const [searchResults, setSearchResults] = useState<any[]>([]);
   const [showAddForm, setShowAddForm] = useState(false);
   const [addParentId, setAddParentId] = useState<string | null>(null);
+  const [activeView, setActiveView] = useState<'editor' | 'graph'>('editor');
 
   const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
     const query = e.target.value;
@@ -110,9 +112,44 @@ const MainLayout: React.FC = () => {
           {showSidebar ? <ChevronLeft size={20} /> : <ChevronRight size={20} />}
         </button>
         
-        {/* Main content area with element editor */}
+        {/* Main content area with tabs */}
         <div className={`flex-1 overflow-auto transition-all duration-300 ${showSidebar ? 'ml-0' : 'ml-8'}`}>
-          <ElementEditor showAddForm={showAddForm} onCloseAddForm={() => setShowAddForm(false)} addParentId={addParentId} />
+          {/* Tabs */}
+          <div className="border-b border-gray-200">
+            <div className="flex">
+              <button
+                onClick={() => setActiveView('editor')}
+                className={`px-4 py-2 flex items-center gap-2 ${
+                  activeView === 'editor'
+                    ? 'border-b-2 border-blue-500 text-blue-600'
+                    : 'text-gray-500 hover:text-gray-700'
+                }`}
+              >
+                <FileEdit size={18} />
+                Éditeur
+              </button>
+              <button
+                onClick={() => setActiveView('graph')}
+                className={`px-4 py-2 flex items-center gap-2 ${
+                  activeView === 'graph'
+                    ? 'border-b-2 border-blue-500 text-blue-600'
+                    : 'text-gray-500 hover:text-gray-700'
+                }`}
+              >
+                <Layout size={18} />
+                Vue Graphique
+              </button>
+            </div>
+          </div>
+
+          {/* Content */}
+          <div className="h-[calc(100vh-8rem)]">
+            {activeView === 'editor' ? (
+              <ElementEditor showAddForm={showAddForm} onCloseAddForm={() => setShowAddForm(false)} addParentId={addParentId} />
+            ) : (
+              <GraphView />
+            )}
+          </div>
         </div>
       </div>
     </div>

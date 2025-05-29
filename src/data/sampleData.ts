@@ -114,7 +114,27 @@ const sampleData: ElementsData = {
         "id": "prob16",
         "type": "probleme",
         "title": "LA MACHINE FUME BEAUCOUP",
-        "parent": "cat3"
+        "parent": "cat3",
+        "next": ["etatA", "etatB"]
+    },
+    {
+        "id": "etatA",
+        "type": "etat",
+        "title": "PAS DE MELANGE DE CARBURANT",
+        "parent": "prob16"
+    },
+    {
+        "id": "etatB",
+        "type": "etat",
+        "title": "MELANGE DE CARBURANT",
+        "parent": "prob16",
+        "next": ["action1"]
+    },
+    {
+        "id": "action1",
+        "type": "action",
+        "title": "FAIRE UNE VIDANGE COMPLETE DU CIRCUIT, CHANGER LE MELANGE",
+        "parent": "etatB"
     },
     {
         "id": "etat1",
