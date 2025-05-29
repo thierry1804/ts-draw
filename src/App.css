@@ -1,0 +1,46 @@
+.drag-over {
+  border: 2px dashed #3b82f6;
+  background-color: rgba(59, 130, 246, 0.1);
+}
+
+.tree-node {
+  transition: all 0.2s ease;
+}
+
+.tree-node:hover {
+  background-color: rgba(59, 130, 246, 0.05);
+}
+
+.node-item {
+  cursor: pointer;
+  border-radius: 4px;
+  transition: all 0.2s ease;
+}
+
+.node-item.selected {
+  background-color: #3b82f6;
+  color: white;
+}
+
+.node-item:hover:not(.selected) {
+  background-color: rgba(59, 130, 246, 0.1);
+}
+
+.drop-indicator {
+  height: 2px;
+  background-color: #3b82f6;
+  margin: 4px 0;
+  display: none;
+}
+
+.drop-indicator.active {
+  display: block;
+}
+
+.expand-icon {
+  transition: transform 0.2s ease;
+}
+
+.expanded .expand-icon {
+  transform: rotate(90deg);
+}
