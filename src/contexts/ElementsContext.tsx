@@ -33,8 +33,16 @@ interface ElementsProviderProps {
 }
 
 const ElementsProvider: React.FC<ElementsProviderProps> = ({ children }) => {
-  const [elements, setElements] = useState<Element[]>(sampleData.elements);
+  const [elements, setElements] = useState<Element[]>(() => {
+    const saved = localStorage.getItem('elementsData');
+    return saved ? JSON.parse(saved) : sampleData.elements;
+  });
   const [selectedElement, setSelectedElement] = useState<Element | null>(null);
+
+  // Sauvegarde automatique dans le localStorage à chaque modification
+  React.useEffect(() => {
+    localStorage.setItem('elementsData', JSON.stringify(elements));
+  }, [elements]);
 
   // Add new element
   const addElement = (element: Element) => {

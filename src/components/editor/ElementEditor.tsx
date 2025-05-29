@@ -7,9 +7,10 @@ import { Check, Plus, X } from 'lucide-react';
 interface ElementEditorProps {
   showAddForm: boolean;
   onCloseAddForm: () => void;
+  addParentId?: string | null;
 }
 
-const ElementEditor: React.FC<ElementEditorProps> = ({ showAddForm, onCloseAddForm }) => {
+const ElementEditor: React.FC<ElementEditorProps> = ({ showAddForm, onCloseAddForm, addParentId }) => {
   const { 
     selectedElement, 
     elements, 
@@ -35,15 +36,15 @@ const ElementEditor: React.FC<ElementEditorProps> = ({ showAddForm, onCloseAddFo
       });
       setIsEditMode(true);
     } else if (showAddForm) {
-      // When adding a new element, set the parent to the selected element's ID
+      // Lors de l'ajout, utiliser addParentId comme parent si défini
       setFormData({
         ...DEFAULT_FORM_DATA,
         id: generateId(),
-        parent: selectedElement?.id || null
+        parent: addParentId || null
       });
       setIsEditMode(false);
     }
-  }, [selectedElement, showAddForm]);
+  }, [selectedElement, showAddForm, addParentId]);
   
   // Generate a new ID based on type
   const generateId = (): string => {

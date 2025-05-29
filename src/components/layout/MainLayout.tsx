@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import { ChevronLeft, ChevronRight, Download, Plus, Search } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Download, Plus, Search, Save } from 'lucide-react';
+import { toast } from 'react-hot-toast';
 import Header from './Header';
 import TreeView from '../tree/TreeView';
 import ElementEditor from '../editor/ElementEditor';
@@ -7,11 +8,12 @@ import SearchResults from '../search/SearchResults';
 import { useElements } from '../../contexts/ElementsContext';
 
 const MainLayout: React.FC = () => {
-  const { exportJson, searchElements, setSelectedElement } = useElements();
+  const { exportJson, searchElements, setSelectedElement, selectedElement, elements } = useElements();
   const [showSidebar, setShowSidebar] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
   const [searchResults, setSearchResults] = useState<any[]>([]);
   const [showAddForm, setShowAddForm] = useState(false);
+  const [addParentId, setAddParentId] = useState<string | null>(null);
 
   const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
     const query = e.target.value;
@@ -26,8 +28,14 @@ const MainLayout: React.FC = () => {
   };
 
   const handleAddClick = () => {
-    setSelectedElement(null); // Clear any selected element
+    setAddParentId(selectedElement?.id || null);
+    setSelectedElement(null);
     setShowAddForm(true);
+  };
+
+  const handleManualSave = () => {
+    localStorage.setItem('elementsData', JSON.stringify(elements));
+    toast.success('Structure sauvegardée !');
   };
 
   return (
@@ -52,6 +60,13 @@ const MainLayout: React.FC = () => {
                     title="Add new element"
                   >
                     <Plus size={18} />
+                  </button>
+                  <button 
+                    onClick={handleManualSave}
+                    className="p-2 rounded-md bg-yellow-500 text-white hover:bg-yellow-600 transition-colors"
+                    title="Sauvegarder la structure"
+                  >
+                    <Save size={18} />
                   </button>
                   <button 
                     onClick={exportJson}
@@ -97,7 +112,7 @@ const MainLayout: React.FC = () => {
         
         {/* Main content area with element editor */}
         <div className={`flex-1 overflow-auto transition-all duration-300 ${showSidebar ? 'ml-0' : 'ml-8'}`}>
-          <ElementEditor showAddForm={showAddForm} onCloseAddForm={() => setShowAddForm(false)} />
+          <ElementEditor showAddForm={showAddForm} onCloseAddForm={() => setShowAddForm(false)} addParentId={addParentId} />
         </div>
       </div>
     </div>
