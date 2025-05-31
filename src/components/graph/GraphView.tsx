@@ -9,6 +9,7 @@ import ReactFlow, {
   useEdgesState,
   Position,
   NodeProps,
+  Handle,
 } from 'reactflow';
 import 'reactflow/dist/style.css';
 import { useElements } from '../../contexts/ElementsContext';
@@ -83,6 +84,18 @@ const CustomNode: React.FC<NodeProps> = ({ data }) => {
       wordBreak: 'break-word',
       lineHeight: 1.3,
     }}>
+      <Handle
+        type="source"
+        position={Position.Bottom}
+        id="bottom"
+        style={{ background: '#555' }}
+      />
+      <Handle
+        type="target"
+        position={Position.Top}
+        id="top"
+        style={{ background: '#555' }}
+      />
       <div style={{ fontWeight: 'bold', marginBottom: 2, fontSize: 13 }}>{TYPE_DISPLAY_NAMES[data.type] || data.type}</div>
       <div style={{ fontSize: 13 }}>{data.label}</div>
     </div>
@@ -122,67 +135,88 @@ const GraphView: React.FC = () => {
   const subIds = new Set(subElements.map(e => e.id));
 
   // Convertir les éléments en nœuds et arêtes pour ReactFlow
-  const initialNodes: Node[] = subElements
-    .filter(element => ['probleme', 'etat', 'verif'].includes(element.type))
-    .map(element => ({
-      id: element.id,
-      type: 'custom',
-      data: { 
-        label: element.title,
-        type: element.type
-      },
-      position: { x: 0, y: 0 },
-      style: {
-        background: GRAPH_TYPE_COLORS[element.type],
-        color: '#fff',
-        padding: 10,
-        borderRadius: 8,
-        width: nodeWidth,
-        height: nodeHeight,
-      },
-      sourcePosition: Position.Right,
-      targetPosition: Position.Left,
-    }));
+  const initialNodes: Node[] = subElements.map(element => ({
+    id: element.id,
+    type: 'custom',
+    data: {
+      label: element.title,
+      type: element.type
+    },
+    position: { x: 0, y: 0 },
+    style: {
+      background: GRAPH_TYPE_COLORS[element.type as keyof typeof GRAPH_TYPE_COLORS],
+      color: '#fff',
+      padding: 10,
+      borderRadius: 8,
+      width: nodeWidth,
+      height: nodeHeight,
+    },
+    sourcePosition: Position.Right,
+    targetPosition: Position.Left,
+  }));
 
-  const initialEdges: Edge[] = subElements
-    .filter(element => ['probleme', 'etat', 'verif'].includes(element.type))
-    .flatMap(element => {
-      const edges: Edge[] = [];
-      if (element.next) {
-        element.next.forEach(nextId => {
-          if (subIds.has(nextId)) {
-            edges.push({
-              id: `${element.id}-${nextId}`,
-              source: element.id,
-              target: nextId,
-              animated: true,
-              style: { stroke: '#555' },
-            });
-          }
-        });
-      }
-      if (element.next_ok && subIds.has(element.next_ok)) {
-        edges.push({
-          id: `${element.id}-ok-${element.next_ok}`,
-          source: element.id,
-          target: element.next_ok,
-          label: 'OK',
-          animated: true,
-          style: { stroke: '#22c55e' },
-        });
-      }
-      if (element.next_ko && subIds.has(element.next_ko)) {
-        edges.push({
-          id: `${element.id}-ko-${element.next_ko}`,
-          source: element.id,
-          target: element.next_ko,
-          label: 'KO',
-          animated: true,
-          style: { stroke: '#ef4444' },
-        });
-      }
-      return edges;
-    });
+  const initialEdges: Edge[] = subElements.flatMap(element => {
+    const edges: Edge[] = [];
+    if (element.next) {
+      element.next.forEach(nextId => {
+        if (subIds.has(nextId)) {
+          edges.push({
+            id: `${element.id}-${nextId}`,
+            source: element.id,
+            target: nextId,
+            sourceHandle: 'bottom',
+            targetHandle: 'top',
+            animated: true,
+            style: { stroke: '#555', strokeWidth: 2 },
+            markerEnd: {
+              type: 'arrowclosed',
+              width: 20,
+              height: 20,
+              color: '#555',
+            },
+          });
+        }
+      });
+    }
+    if (element.next_ok && subIds.has(element.next_ok)) {
+      edges.push({
+        id: `${element.id}-ok-${element.next_ok}`,
+        source: element.id,
+        target: element.next_ok,
+        sourceHandle: 'bottom',
+        targetHandle: 'top',
+        label: 'OK',
+        animated: true,
+        style: { stroke: '#22c55e', strokeWidth: 2 },
+        markerEnd: {
+          type: 'arrowclosed',
+          width: 20,
+          height: 20,
+          color: '#22c55e',
+        },
+      });
+    }
+    if (element.next_ko && subIds.has(element.next_ko)) {
+      edges.push({
+        id: `${element.id}-ko-${element.next_ko}`,
+        source: element.id,
+        target: element.next_ko,
+        sourceHandle: 'bottom',
+        targetHandle: 'top',
+        label: 'KO',
+        animated: true,
+        style: { stroke: '#ef4444', strokeWidth: 2 },
+        markerEnd: {
+          type: 'arrowclosed',
+          width: 20,
+          height: 20,
+          color: '#ef4444',
+        },
+      });
+    }
+    return edges;
+  });
+  console.log('EDGES GENERATED FOR GRAPH:', initialEdges);
 
   const [nodes, setNodes, onNodesChange] = useNodesState([]);
   const [edges, setEdges, onEdgesChange] = useEdgesState([]);

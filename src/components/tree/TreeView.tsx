@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { ChevronRight, Trash2, Plus } from 'lucide-react';
 import { useElements } from '../../contexts/ElementsContext';
 import { TreeNode, TYPE_COLORS } from '../../types';
+import ConfirmModal from '../common/ConfirmModal';
 
 const TreeView: React.FC = () => {
   const { getTreeData } = useElements();
@@ -27,6 +28,7 @@ const TreeNodeComponent: React.FC<TreeNodeProps> = ({ node, level }) => {
   const [expanded, setExpanded] = useState(true);
   const [dragging, setDragging] = useState(false);
   const [dragOver, setDragOver] = useState(false);
+  const [showConfirmModal, setShowConfirmModal] = useState(false);
   
   const isSelected = selectedElement?.id === element.id;
   const hasChildren = children.length > 0;
@@ -44,9 +46,12 @@ const TreeNodeComponent: React.FC<TreeNodeProps> = ({ node, level }) => {
   
   const handleDelete = (e: React.MouseEvent) => {
     e.stopPropagation();
-    if (confirm(`Are you sure you want to delete "${element.title}" and all its children?`)) {
-      deleteElement(element.id);
-    }
+    setShowConfirmModal(true);
+  };
+
+  const handleConfirmDelete = () => {
+    deleteElement(element.id);
+    setShowConfirmModal(false);
   };
   
   // Drag and drop handlers
@@ -107,7 +112,7 @@ const TreeNodeComponent: React.FC<TreeNodeProps> = ({ node, level }) => {
         <div className="flex-1 truncate text-sm">{element.title}</div>
         
         <button 
-          className="p-1 text-gray-500 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-opacity"
+          className="delete-button p-1 text-gray-500 hover:text-red-500 transition-colors"
           onClick={handleDelete}
           title="Delete element and its children"
         >
@@ -122,6 +127,14 @@ const TreeNodeComponent: React.FC<TreeNodeProps> = ({ node, level }) => {
           ))}
         </div>
       )}
+
+      <ConfirmModal
+        isOpen={showConfirmModal}
+        title="Confirmer la suppression"
+        message={`Êtes-vous sûr de vouloir supprimer "${element.title}" et tous ses enfants ?`}
+        onConfirm={handleConfirmDelete}
+        onCancel={() => setShowConfirmModal(false)}
+      />
     </div>
   );
 };

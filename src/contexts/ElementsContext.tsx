@@ -1,6 +1,6 @@
 import React, { createContext, useState, useContext, useEffect, ReactNode } from 'react';
 import { toast } from 'react-hot-toast';
-import { Element, ElementsData, ElementType, TreeNode } from '../types';
+import { Element, ElementsData, TreeNode } from '../types';
 import sampleData from '../data/sampleData';
 
 interface ElementsContextProps {
@@ -40,7 +40,7 @@ const ElementsProvider: React.FC<ElementsProviderProps> = ({ children }) => {
   const [selectedElement, setSelectedElement] = useState<Element | null>(null);
 
   // Sauvegarde automatique dans le localStorage à chaque modification
-  React.useEffect(() => {
+  useEffect(() => {
     localStorage.setItem('elementsData', JSON.stringify(elements));
   }, [elements]);
 
@@ -147,10 +147,16 @@ const ElementsProvider: React.FC<ElementsProviderProps> = ({ children }) => {
 
   // Export JSON data
   const exportJson = () => {
+    if (elements.length === 0) {
+      toast.error('No data to export');
+      return;
+    }
+
     const data: ElementsData = { elements };
     const json = JSON.stringify(data, null, 2);
     const blob = new Blob([json], { type: 'application/json' });
     const url = URL.createObjectURL(blob);
+
     const a = document.createElement('a');
     a.href = url;
     a.download = 'troubleshooting-data.json';
@@ -165,8 +171,8 @@ const ElementsProvider: React.FC<ElementsProviderProps> = ({ children }) => {
   const moveElement = (elementId: string, newParentId: string | null) => {
     // Prevent moving an element to its own descendant
     if (newParentId) {
-      let currentParent = newParentId;
-      while (currentParent) {
+      let currentParent: string | null = newParentId;
+      while (currentParent !== null) {
         if (currentParent === elementId) {
           toast.error("Cannot move an element to its own descendant");
           return;
